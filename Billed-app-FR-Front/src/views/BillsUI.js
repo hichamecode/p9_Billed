@@ -19,9 +19,17 @@ const row = (bill) => {
     `)
   }
 
+// correction de l'ordre des Bills  
+// on sort() directement les data car ce sont des Arrays, puis on les map et on les transforme en string
 const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
-}
+  if (data && data.length) {
+    const sortedData = data.sort((a, b) => new Date(b.date) - new Date(a.date))
+    const mappedAndJoinedData = sortedData.map(bill => row(bill)).join("")
+    return mappedAndJoinedData
+  } else {
+    return ""
+  }
+};
 
 export default ({ data: bills, loading, error }) => {
   
