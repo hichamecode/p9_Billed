@@ -2,13 +2,23 @@
  * @jest-environment jsdom
  */
 
-import {screen, waitFor} from "@testing-library/dom"
-import BillsUI from "../views/BillsUI.js"
-import { bills } from "../fixtures/bills.js"
-import { ROUTES_PATH} from "../constants/routes.js";
-import {localStorageMock} from "../__mocks__/localStorage.js";
+import { fireEvent, screen, waitFor } from '@testing-library/dom';
+import BillsUI from '../views/BillsUI.js';
+import Bills from '../containers/Bills.js';
+import mockStore from '../__mocks__/store.js';
+import { bills } from '../fixtures/bills.js';
+import { ROUTES_PATH } from '../constants/routes.js';
+import { localStorageMock } from '../__mocks__/localStorage.js';
 
-import router from "../app/Router.js";
+import router from '../app/Router.js';
+
+import '@testing-library/jest-dom/extend-expect';
+
+jest.mock('../app/Store', () => mockStore);
+
+const $ = require('jquery');
+global.$ = global.jQuery = $;
+$.fn.modal = jest.fn(); // Mock the modal function
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
@@ -35,5 +45,47 @@ describe("Given I am connected as an employee", () => {
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
     })
+
+    test("Then if I click the 'New Bill' button I should navigate to the New Bill page", async () => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+
+     document.body.innerHTML = BillsUI({ data: bills });
+     const onNavigate = jest.fn()
+
+     new Bills({
+       document,
+       onNavigate,
+       store: null,
+       localStorage: window.localStorage,
+     });
+
+     const newBillBtn = screen.getByTestId('btn-new-bill');
+     fireEvent.click(newBillBtn);
+     expect(onNavigate).toHaveBeenLastCalledWith('#employee/bill/new');
+    })
+
+    test("Then clicking an eye icon should display the modal", async () => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+
+     document.body.innerHTML = BillsUI({ data: bills });
+     const onNavigate = jest.fn()
+
+     new Bills({
+       document,
+       onNavigate,
+       store: null,
+       localStorage: window.localStorage,
+     });
+
+      const firstEyeIcon = screen.getAllByTestId("icon-eye")[0];
+      await waitFor(() => expect(firstEyeIcon).toBeInTheDocument())
+      fireEvent.click(firstEyeIcon);
+    });
   })
 })
