@@ -21,13 +21,16 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
     const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+    const errorMessage = this.document.querySelector('#errorMessage')
+    // const successMessage = this.document.querySelector('#successMessage')
 
     // test regex pour fileName
     if (!allowedExtensions.test(fileName)) {
       this.document.querySelector(`input[data-testid="file"]`).value = ''
-      alert("Ce type de fichier n'est pas supporté. Merci de choisir un fichier jpeg, jpg ou png")
+      errorMessage.textContent = "Ce type de fichier n'est pas supporté. Merci de choisir un fichier jpeg, jpg ou png"
       return
-    }
+    } 
+    
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
@@ -48,6 +51,7 @@ export default class NewBill {
         this.fileName = fileName
       }).catch(error => console.error(error))
   }
+  
   handleSubmit = e => {
     e.preventDefault()
     console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
@@ -70,6 +74,7 @@ export default class NewBill {
   }
 
   // not need to cover this function by tests
+  /* istanbul ignore next */
   updateBill = (bill) => {
     if (this.store) {
       this.store
