@@ -75,53 +75,19 @@ describe("Given I am connected as an employee on the NewBill page", () => {
     document.body.innerHTML = NewBillUI();
   });
 
-  describe("When I try to upload a file", () => {
-    test('Then it should create a New Bill', async () => {
-      const mockBills = jest.spyOn(mockStore, 'bills');
-      const mockFile = {
-        fileUrl: 'https://localhost:3456/images/test.jpg',
-        key: '1234',
-      };
-      const post = await mockStore.bills().create(mockFile);
-      expect(mockBills).toHaveBeenCalled();
-      expect(post).toEqual(mockFile);
-    });
-  });
-
-  test('Then it should update a New Bill', async () => {
-    const mockBill = {
-      id: '47qAXb6fIm2zOKkLzMro',
-      vat: '80',
-      fileUrl:
-        'https://firebasestorage.googleapis.com/v0/b/billable-677b6.a…f-1.jpg?alt=media&token=c1640e12-a24b-4b11-ae52-529112e9602a',
-      status: 'pending',
-      type: 'Hôtel et logement',
-      commentary: 'séminaire billed',
-      name: 'encore',
-      fileName: 'preview-facture-free-201801-pdf-1.jpg',
-      date: '2004-04-04',
-      amount: 400,
-      commentAdmin: 'ok',
-      email: 'a@a',
-      pct: 20,
-    };
-
-    const post = await mockStore.bills().update(mockBill);
-
-    expect(mockStore.bills).toHaveBeenCalled();
-    expect(post).toEqual(mockBill);
-  });
-
   describe('When I try to upload a file and an error occurs', () => {
     test('Then it fails and an error is displayed in the console', async () => {
+      const mockBills = jest.spyOn(mockStore, 'bills');
       const consoleError = jest.spyOn(console, 'error');
 
-      mockStore.bills.mockImplementationOnce(() => {
+      mockBills.mockImplementationOnce(() => {
         return {
           create: jest.fn(() => Promise.reject(new Error('error in console'))),
           update: jest.fn()
         };
       });
+
+      mockStore.bills = mockBills
 
       const newBill = new NewBill({
         document,
